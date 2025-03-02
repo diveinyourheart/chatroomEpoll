@@ -1,0 +1,9 @@
+golang环境变量配置：
+GOPATH: D:\Code\golang --在此文件夹下的src文件夹存储项目代码
+GOPRIVATE: git.mycompany.com,github.com/my/private
+GOPROXY: https://goproxy.io,direct
+GOROOT: D:\Go_Programming_language\go1_24 --指定go安装路径
+
+VScode打开设置(ctrl + ',') 搜索GO:GOPATH在setting.json文件中配置对应参数
+将在这个参数对应的文件下下载dlv,gopls等工具以及用到的包，默认情况下这个参数
+在c盘的用户目录下，很占空间
