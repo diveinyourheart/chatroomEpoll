@@ -95,6 +95,7 @@ func main() {
 					continue
 				}
 
+				//将net.Conn升级为tls.Conn,客户端需要执行tls.Client
 				tlsConn := tls.Server(conn, config)
 				processor := &Processor{
 					Conn:          tlsConn,
