@@ -47,6 +47,7 @@ func keyboardTextInputManager() {
 			fmt.Println(prompt)
 		}
 		fmt.Println("请输入文本，输入exit+回车退出文本输入，输入rewrite+回车重写文本")
+		fmt.Println("----------------------------------------------------------")
 		scnr := bufio.NewScanner(os.Stdin)
 		var txt string
 		for scnr.Scan() {

@@ -116,7 +116,7 @@ func ShowMenu(wg *sync.WaitGroup) {
 					newLine := fmt.Sprintf("\n----------%d. 添加群成员为管理员----------\n", cnt)
 					prompt += newLine
 				}
-				inputSelect := utils.ReadIntInput("")
+				inputSelect := utils.ReadIntInput(prompt)
 				switch inputSelect {
 				case 0:
 					continue
@@ -127,7 +127,7 @@ func ShowMenu(wg *sync.WaitGroup) {
 					fmt.Println("已进入聊天室，你可以输入你想要发送的文本信息，输入quit+回车退出聊天室")
 					var txt string
 					for {
-						txt = utils.ReadTextInput("\n------------------------------------------------------------\n")
+						txt = utils.ReadTextInput("------------------------------------------------------------")
 						if txt == "quit\n" {
 							quitGroupChatChan <- struct{}{}
 							break
@@ -146,6 +146,7 @@ func ShowMenu(wg *sync.WaitGroup) {
 						}
 					}
 				default:
+					fmt.Println("输入错误")
 					continue
 				}
 			case 6:
