@@ -18,11 +18,11 @@ const (
 
 var (
 	IntResChan           = make(chan int)
-	IntInputRequestChan  = make(chan struct{}, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
+	IntInputRequestChan  = make(chan string, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
 	StrResChan           = make(chan string)
-	StrInputRequestChan  = make(chan struct{}, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
+	StrInputRequestChan  = make(chan string, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
 	TextResChan          = make(chan string)
-	TextInputRequestChan = make(chan struct{}, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
+	TextInputRequestChan = make(chan string, MAXIMUM_NUMBER_OF_SIMULTANEOUS_REQUESTS)
 )
 
 var (
@@ -96,19 +96,19 @@ func (tf *Transfer) WritePkg(data []byte) (er error) {
 }
 
 // 读取整数输入
-func ReadIntInput() int {
-	IntInputRequestChan <- struct{}{}
+func ReadIntInput(prompt string) int {
+	IntInputRequestChan <- prompt
 	return <-IntResChan
 }
 
 // 读取字符串输入
-func ReadStringInput() string {
-	StrInputRequestChan <- struct{}{}
+func ReadStringInput(prompt string) string {
+	StrInputRequestChan <- prompt
 	return <-StrResChan
 }
 
 // 读取文本内容用于发送消息
-func ReadTextInput() string {
-	TextInputRequestChan <- struct{}{}
+func ReadTextInput(prompt string) string {
+	TextInputRequestChan <- prompt
 	return <-TextResChan
 }

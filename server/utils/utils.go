@@ -76,7 +76,7 @@ func (tf *Transfer) WritePkg(data []byte) (er error) {
 		} else {
 			er = fmt.Errorf("向客户端发送消息失败：%v", err)
 		}
-	} else if n != 13+intPkgLen {
+	} else if n != 8+intPkgLen {
 		er = fmt.Errorf("net.Conn.Write返回的长度与写入网络的字节流的长度不符合")
 	}
 	return

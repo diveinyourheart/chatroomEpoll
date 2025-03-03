@@ -41,8 +41,11 @@ func main() {
 
 func keyboardTextInputManager() {
 	for {
-		<-utils.TextInputRequestChan
+		prompt := <-utils.TextInputRequestChan
 		writeMutex.Lock()
+		if prompt != "" {
+			fmt.Println(prompt)
+		}
 		fmt.Println("请输入文本，输入exit+回车退出文本输入，输入rewrite+回车重写文本")
 		scnr := bufio.NewScanner(os.Stdin)
 		var txt string
@@ -68,8 +71,11 @@ func keyboardTextInputManager() {
 
 func keyboardStringInputManager() {
 	for {
-		<-utils.StrInputRequestChan
+		prompt := <-utils.StrInputRequestChan
 		writeMutex.Lock()
+		if prompt != "" {
+			fmt.Println(prompt)
+		}
 		fmt.Println("tips:输入的字符串不能带有空格")
 		var str string
 		fmt.Scanln(&str)
@@ -80,8 +86,11 @@ func keyboardStringInputManager() {
 
 func keyboardIntInputManager() {
 	for {
-		<-utils.IntInputRequestChan
+		prompt := <-utils.IntInputRequestChan
 		writeMutex.Lock()
+		if prompt != "" {
+			fmt.Println(prompt)
+		}
 		var key int
 		var isValid bool = false
 		for !isValid {
@@ -116,10 +125,8 @@ func showMenu1() int {
 
 // 处理用户登录逻辑
 func handleLogin() {
-	fmt.Println("请输入用户的ID：")
-	Id := utils.ReadIntInput()
-	fmt.Println("请输入用户的密码：")
-	Pwd := utils.ReadStringInput()
+	Id := utils.ReadIntInput("请输入用户的ID：")
+	Pwd := utils.ReadStringInput("请输入用户的密码：")
 
 	// 调用 login 函数
 	conn, err := processes.UserPrcs.Login(Id, Pwd)
@@ -145,17 +152,12 @@ func handleLogin() {
 
 // 处理用户注册逻辑
 func handleRegister() {
-	fmt.Println("正在进行用户注册")
-	fmt.Println("请输入用户的ID(不能为0):")
-	Id := utils.ReadIntInput()
+	Id := utils.ReadIntInput("正在进行用户注册\n请输入用户的ID(不能为0):")
 	for Id == 0 {
-		fmt.Println("ID不能为0哦，请重新输入：")
-		Id = utils.ReadIntInput()
+		Id = utils.ReadIntInput("ID不能为0哦，请重新输入：")
 	}
-	fmt.Println("请输入用户的密码：")
-	Pwd := utils.ReadStringInput()
-	fmt.Println("请输入用户的名字：")
-	name := utils.ReadStringInput()
+	Pwd := utils.ReadStringInput("请输入用户的密码：")
+	name := utils.ReadStringInput("请输入用户的名字：")
 
 	up := &processes.UserProcess{}
 	err := up.Register(Id, Pwd, name)

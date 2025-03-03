@@ -8,6 +8,9 @@ VScode打开设置(ctrl + ',') 搜索GO:GOPATH在setting.json文件中配置对�
 将在这个参数对应的文件下下载dlv,gopls等工具以及用到的包，默认情况下这个参数
 在c盘的用户目录下，很占空间
 
+查看证书
+openssl x509 -in /etc/ssl/certs/mycert.crt -text -noout
+
 将本地已经存在的项目上传到云端 Git 仓库（如 GitHub、GitLab 等）可以按照以下步骤进行操作：
 
 ### 1. **初始化本地 Git 仓库（如果尚未初始化）**

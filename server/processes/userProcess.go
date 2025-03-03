@@ -111,7 +111,7 @@ func (userP *UserProcess) PushOfflineUserMessages() (err error) {
 			utils.Log("向%d推送一条离线消息失败：%v", userP.UsrId, err)
 		}
 	}
-	if count == len(messages) {
+	if len(messages) != 0 && count == len(messages) {
 		return fmt.Errorf("向%d推送离线消息失败：%v", userP.UsrId, err)
 	}
 	return

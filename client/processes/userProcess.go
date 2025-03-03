@@ -24,7 +24,8 @@ type UserProcess struct {
 func init() {
 	UserPrcs = &UserProcess{}
 	tlsConfig = &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
+		ServerName:         "127.0.0.1",
 	}
 }
 
@@ -34,26 +35,28 @@ func (up *UserProcess) GCOwnerAddGCManager(GCInfo *message.GroupChat) (err error
 		return fmt.Errorf("当前登录用户不是群%d的群主，不能为群添加管理员", GCInfo.GroupID)
 	}
 	GCMgr.OutputGCMembers(GCInfo)
-	fmt.Println("请输入你想添加为管理员的用户的ID")
-	targetID := utils.ReadIntInput()
-	var isValid bool = false
+
+	var isValid bool
+	var targetID int
 	for !isValid {
+		targetID = utils.ReadIntInput("请输入你想添加为管理员的用户的ID")
 		_, exist := GCInfo.GroupMember[targetID]
-		if !exist {
+		if exist {
+			isValid = true
+		} else {
 			fmt.Printf("%d不是该群的群成员，请重新输入", targetID)
-			targetID = utils.ReadIntInput()
+		}
+	}
+
+	for _, v := range GCInfo.GroupMgr {
+		if v == 0 {
 			continue
 		}
-		for _, v := range GCInfo.GroupMgr {
-			if v == 0 {
-				continue
-			}
-			if v == targetID {
-				return fmt.Errorf("%d已经是该群的管理员了", targetID)
-			}
+		if v == targetID {
+			return fmt.Errorf("%d已经是该群的管理员了", targetID)
 		}
-		isValid = true
 	}
+
 	GCManageMes := message.GroupManageMes{
 		ManageMesType: message.ADD_ADMINISTRATOR,
 		OperandID:     targetID,
@@ -89,8 +92,6 @@ func (up *UserProcess) HandleGroupManageMes(mes *message.Message) (err error) {
 	}
 	requestorInfo := GCManageMes.OperandInfo
 	GCName, _ := GCMgr.GetGCNameById(GCManageMes.GroupChatID)
-	fmt.Printf("ID为%d,昵称为%s申请加入%s群聊,是否同意？输入0代表拒绝，输入1代表同意\n", requestorInfo.FriendId, requestorInfo.FriendName, GCName)
-	sign := utils.ReadIntInput()
 	GCManageResMes := message.GroupManageResMes{
 		ManageMesType:   message.JOIN_GROUP_CHAT,
 		OperandID:       GCManageMes.OperandID,
@@ -98,6 +99,14 @@ func (up *UserProcess) HandleGroupManageMes(mes *message.Message) (err error) {
 		DecidedBy:       model.CurUsr.Usr.UserId,
 		JoinRequestTime: GCManageMes.JoinRequestTime,
 	}
+	prompt := fmt.Sprintf(
+		"ID为%d,昵称为%s申请加入%s群聊,并备注：\n%s\n是否同意？输入0代表拒绝，输入1代表同意",
+		requestorInfo.FriendId,
+		requestorInfo.FriendName,
+		GCName,
+		GCManageMes.ManageInfo,
+	)
+	sign := utils.ReadIntInput(prompt)
 	var isValid bool = false
 	for !isValid {
 		switch sign {
@@ -110,8 +119,7 @@ func (up *UserProcess) HandleGroupManageMes(mes *message.Message) (err error) {
 			fmt.Println("你同意了群聊加入申请")
 			isValid = true
 		default:
-			fmt.Println("输入错误，请重新输入")
-			sign = utils.ReadIntInput()
+			sign = utils.ReadIntInput("输入错误，请重新输入")
 		}
 	}
 	data, err := json.Marshal(GCManageResMes)
@@ -258,10 +266,10 @@ func (up *UserProcess) HandleAddFriendResMes(mes *message.Message) (err error) {
 		newFriend := &addFriendResMes.FriendInfo
 		FrdMgr.AddNewFriendToMap(newFriend)
 		fmt.Printf("ID为%d，昵称为%s的用户同意了你的好友申请\n", newFriend.FriendId, newFriend.FriendName)
-		fmt.Println("为其添加备注(按回车键则跳过)：")
-		noteName := utils.ReadStringInput()
+		noteName := utils.ReadStringInput("为其添加备注(按回车键则跳过)：")
 		if noteName != "" {
 			FrdMgr.SetNoteNameById(newFriend.FriendId, noteName)
+			//to do 需要让服务器修改数据
 		}
 		FrdMgr.outputFriendsList()
 	} else {
@@ -276,9 +284,13 @@ func (up *UserProcess) HandleAddFriendRequest(mes *message.Message) (err error) 
 	if err != nil {
 		return fmt.Errorf("反序列化失败：%v", err)
 	}
-	fmt.Printf("ID为%d,昵称为%s向你发来一个好友申请，并留言到\n%s\n", addFriendMes.Requester.FriendId, addFriendMes.Requester.FriendName, addFriendMes.Note)
-	fmt.Println("请选择是否同意好友申请，输入0代表不同意，输入1代表同意")
-	sign := utils.ReadIntInput()
+	prompt := fmt.Sprintf(
+		"ID为%d,昵称为%s向你发来一个好友申请，并留言到\n%s\n请选择是否同意好友申请，输入0代表不同意，输入1代表同意",
+		addFriendMes.Requester.FriendId,
+		addFriendMes.Requester.FriendName,
+		addFriendMes.Note,
+	)
+	sign := utils.ReadIntInput(prompt)
 	var addFriendResMes message.AddFriendResMes
 	addFriendResMes.TargetUserID = addFriendMes.Requester.FriendId
 	var isValid bool = false
@@ -297,15 +309,13 @@ func (up *UserProcess) HandleAddFriendRequest(mes *message.Message) (err error) 
 				FriendStatus: addFriendMes.Requester.FriendStatus,
 			}
 			FrdMgr.AddNewFriendToMap(newFriend)
-			fmt.Println("为其添加备注(按回车键则跳过)：")
-			noteName := utils.ReadStringInput()
+			noteName := utils.ReadStringInput("为其添加备注(按回车键则跳过)：")
 			if noteName != "" {
 				FrdMgr.SetNoteNameById(newFriend.FriendId, noteName)
 			}
 			FrdMgr.outputFriendsList()
 		default:
-			fmt.Println("输入错误，请重新输入")
-			sign = utils.ReadIntInput()
+			sign = utils.ReadIntInput("输入错误，请重新输入\n请选择是否同意好友申请，输入0代表不同意，输入1代表同意")
 		}
 	}
 	data, err := json.Marshal(addFriendResMes)

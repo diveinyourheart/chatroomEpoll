@@ -89,8 +89,7 @@ func (this *FileReadWrite) GenerateFriendMesList(ID int) error {
 		for i := len(record) - 1; i >= 0; i-- {
 			record[i].Visualize()
 		}
-		fmt.Println("输入continue+回车键查看更早的聊天记录，此外输入任意键退出查看")
-		cmd = utils.ReadStringInput() + "\n"
+		cmd = utils.ReadStringInput("输入continue+回车键查看更早的聊天记录，此外输入任意键退出查看") + "\n"
 		offset += batchSize
 	}
 	return nil

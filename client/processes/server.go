@@ -42,17 +42,17 @@ func ShowMenu(wg *sync.WaitGroup) {
 		case <-logOutChan:
 			return
 		default:
-			fmt.Println("----------1. 显示好友列表----------")
-			fmt.Println("----------2. 发送消息----------")
-			fmt.Println("----------3. 消息列表----------")
-			fmt.Println("----------4. 添加新的好友----------")
-			fmt.Println("----------5. 显示群聊列表----------")
-			fmt.Println("----------6. 创建群聊----------")
-			fmt.Println("----------7. 加入群聊----------")
-			fmt.Println("----------8. 退出登录----------")
-			fmt.Println("----------9. 退出系统----------")
-			fmt.Println("请选择（1-6）：")
-			key := utils.ReadIntInput()
+			prompt := `----------1. 显示好友列表----------
+----------2. 发送消息----------
+----------3. 消息列表----------
+----------4. 添加新的好友----------
+----------5. 显示群聊列表----------
+----------6. 创建群聊----------
+----------7. 加入群聊----------
+----------8. 退出登录----------
+----------9. 退出系统----------
+----------请选择（1-6）：----------`
+			key := utils.ReadIntInput(prompt)
 			if model.CurUsr.Usr.UserId == 0 {
 				//说明刚刚在此客户端登录的用户在远端异地登录，此客户端的用户被动登出
 				fmt.Println("此账号已在异端登录")
@@ -63,14 +63,12 @@ func ShowMenu(wg *sync.WaitGroup) {
 				FrdMgr.outputFriendsList()
 			case 2:
 				FrdMgr.outputFriendsList()
-				fmt.Println("请输入目标用户的ID：")
-				desId := utils.ReadIntInput()
+				desId := utils.ReadIntInput("请输入目标用户的ID：")
 				if _, exist := FrdMgr.GetFriendNameById(desId); !exist || desId == model.CurUsr.Usr.UserId {
 					fmt.Printf("%d不是你的好友\n", desId)
 					continue
 				}
-				fmt.Println("请输入消息内容：")
-				content := utils.ReadTextInput()
+				content := utils.ReadTextInput("请输入消息内容：")
 				err := SmsPrcs.sendOneToOneMesById(desId, content)
 				if err != nil {
 					fmt.Println("发送失败：", err)
@@ -79,8 +77,7 @@ func ShowMenu(wg *sync.WaitGroup) {
 				fmt.Println("发送成功！")
 			case 3:
 				FrdMgr.outputFriendMesList()
-				fmt.Println("请输入你想要查看消息的用户的ID")
-				targetID := utils.ReadIntInput()
+				targetID := utils.ReadIntInput("请输入你想要查看消息的用户的ID")
 				if _, exist := FrdMgr.GetFriendNameById(targetID); !exist || targetID == model.CurUsr.Usr.UserId {
 					fmt.Printf("%d不是你的好友\n", targetID)
 				} else {
@@ -88,14 +85,12 @@ func ShowMenu(wg *sync.WaitGroup) {
 					FileRW.GenerateFriendMesList(targetID)
 				}
 			case 4:
-				fmt.Println("请输入你想要添加的用户的ID：")
-				strangerId := utils.ReadIntInput()
+				strangerId := utils.ReadIntInput("请输入你想要添加的用户的ID：")
 				_, exist := FrdMgr.GetFriendNameById(strangerId)
 				if exist {
 					fmt.Printf("%d已经是你的好友了\n", strangerId)
 				} else {
-					fmt.Println("输入备注：")
-					note := utils.ReadTextInput()
+					note := utils.ReadTextInput("输入备注：")
 					err := UserPrcs.sendAddFriendRequest(strangerId, note)
 					if err != nil {
 						fmt.Println("发送好友申请失败：", err)
@@ -105,24 +100,23 @@ func ShowMenu(wg *sync.WaitGroup) {
 				}
 			case 5:
 				GCMgr.outputGCMesList()
-				fmt.Println("----------输入群ID进行下一步操作----------")
-				inputID := utils.ReadIntInput()
+				inputID := utils.ReadIntInput("----------输入群ID进行下一步操作----------")
 				GCInfo := GCMgr.GetGroupChatInfoByID(inputID)
 				for GCInfo == nil {
-					fmt.Println("你的群聊列表中没有这一群聊，请重新输入")
-					inputID = utils.ReadIntInput()
+					inputID = utils.ReadIntInput("你的群聊列表中没有这一群聊，请重新输入")
 					GCInfo = GCMgr.GetGroupChatInfoByID(inputID)
 				}
-				fmt.Println("----------可选操作----------")
-				fmt.Println("----------0. 回到上一级菜单----------")
-				fmt.Println("----------1. 进入群聊----------")
-				fmt.Println("----------2. 显示群成员----------")
+				prompt := `----------可选操作----------
+----------0. 回到上一级菜单----------
+----------1. 进入群聊----------
+----------2. 显示群成员----------`
 				cnt := 2
 				if GCInfo.GroupLeader == model.CurUsr.Usr.UserId {
 					cnt++
-					fmt.Printf("----------%d. 添加群成员为管理员----------\n", cnt)
+					newLine := fmt.Sprintf("\n----------%d. 添加群成员为管理员----------\n", cnt)
+					prompt += newLine
 				}
-				inputSelect := utils.ReadIntInput()
+				inputSelect := utils.ReadIntInput("")
 				switch inputSelect {
 				case 0:
 					continue
@@ -131,10 +125,9 @@ func ShowMenu(wg *sync.WaitGroup) {
 					go GCMesRealTimeDisplay()
 					FileRW.outputGroupChatHistoryMes(GCInfo.GroupID)
 					fmt.Println("已进入聊天室，你可以输入你想要发送的文本信息，输入quit+回车退出聊天室")
-					fmt.Printf("\n------------------------------------------------------------\n")
 					var txt string
 					for {
-						txt = utils.ReadTextInput()
+						txt = utils.ReadTextInput("\n------------------------------------------------------------\n")
 						if txt == "quit\n" {
 							quitGroupChatChan <- struct{}{}
 							break
@@ -156,8 +149,7 @@ func ShowMenu(wg *sync.WaitGroup) {
 					continue
 				}
 			case 6:
-				fmt.Println("请输入群聊名称,按回车键跳过")
-				GCName := utils.ReadStringInput()
+				GCName := utils.ReadStringInput("请输入群聊名称,按回车键跳过")
 				err := UserPrcs.CreateGroupChat(GCName)
 				if err != nil {
 					fmt.Println("创建群聊失败：", err)
@@ -165,14 +157,12 @@ func ShowMenu(wg *sync.WaitGroup) {
 					fmt.Println("群聊创建申请发送成功")
 				}
 			case 7:
-				fmt.Println("请输入你想加入的群聊的ID:")
-				GCID := utils.ReadIntInput()
+				GCID := utils.ReadIntInput("请输入你想加入的群聊的ID:")
 				_, exist := GCMgr.GetGCNameById(GCID)
 				if exist {
 					fmt.Println("你已在该群聊中")
 				} else {
-					fmt.Println("请输入备注，仅群主和管理员可见")
-					note := utils.ReadStringInput()
+					note := utils.ReadStringInput("请输入备注，仅群主和管理员可见")
 					err := UserPrcs.Apply2JoinAGC(GCID, note)
 					if err != nil {
 						fmt.Println("申请加入群聊失败：", err)
@@ -238,7 +228,7 @@ func ProcessServerMes(conn *tls.Conn, wg *sync.WaitGroup) {
 			FrdMgr.updateFriendStatus(notifyMes)
 		case message.OneToOneMesType:
 			var mesFromFriend message.OneToOneMes
-			err = json.Unmarshal([]byte(mes.Data), mesFromFriend)
+			err = json.Unmarshal([]byte(mes.Data), &mesFromFriend)
 			if err != nil {
 				fmt.Println("反序列化服务器端返回的信息失败：", err)
 				continue
