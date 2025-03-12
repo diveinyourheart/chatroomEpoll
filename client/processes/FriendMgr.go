@@ -75,7 +75,7 @@ func (this *FriendMgr) SetNoteNameById(ID int, noteName string) {
 
 func (this *FriendMgr) GetNoteNameById(ID int) string {
 	mu.Lock()
-	mu.Unlock()
+	defer mu.Unlock()
 	return FrdMgr.friendStatusMap[ID].FriendNoteName
 }
 

@@ -236,10 +236,10 @@ func ProcessServerMes(conn *tls.Conn, wg *sync.WaitGroup) {
 			}
 			FileRW.SaveOneToOneMes(&mesFromFriend)
 			unreadMsgCountChan <- mesFromFriend.OriginId
-			fmt.Printf("提示信息：%s发来了一条消息，", FrdMgr.GetAFamilierName(mesFromFriend.OriginId))
+			fmt.Printf("提示信息：%s发来了一条消息", FrdMgr.GetAFamilierName(mesFromFriend.OriginId))
 			cnt := FrdMgr.GetUnreadMesCount(mesFromFriend.OriginId)
 			if cnt > 0 {
-				fmt.Printf("有%d条未读消息", cnt)
+				fmt.Printf(",有%d条未读消息", cnt)
 			}
 			fmt.Printf("\n")
 		case message.AddFriendMesType:
