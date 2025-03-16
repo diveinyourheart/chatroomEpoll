@@ -18,10 +18,6 @@ var (
 	fileDescriberToProcessor map[int32]*Processor
 )
 
-func init() {
-	fileDescriberToProcessor = make(map[int32]*Processor)
-}
-
 // 编写一个ServerProcessMes函数
 // 功能：根据客户端发送消息的种类不同，决定调用哪个函数来处理
 func (p *Processor) serverProcessMes(mes *message.Message) (err error) {

@@ -39,6 +39,38 @@ func Log(format string, args ...interface{}) {
 // 	return nil
 // }
 
+// func (tf *Transfer) ReadPkg() (*message.Message, error) {
+// 	n, err := tf.Conn.Read(tf.buf[:4])
+// 	if err != nil {
+// 		if err == io.EOF {
+// 			return nil, ERROR_CLIENT_DISCONNECTED
+// 		} else {
+// 			return nil, fmt.Errorf("读取客户端发送的消息失败：%v", err)
+// 		}
+// 	} else if n != 4 {
+// 		return nil, fmt.Errorf("读取消息长度信息失败")
+// 	}
+
+// 	pkgLen := binary.BigEndian.Uint32(tf.buf[:4])
+
+// 	n, err = tf.Conn.Read(tf.buf[:pkgLen])
+// 	if err != nil {
+// 		if err == io.EOF {
+// 			return nil, ERROR_CLIENT_DISCONNECTED
+// 		} else {
+// 			return nil, fmt.Errorf("读取客户端发送的消息失败：%v", err)
+// 		}
+// 	} else if n != int(pkgLen) {
+// 		return nil, fmt.Errorf("读取消息失败")
+// 	}
+// 	mes := &message.Message{}
+// 	err = json.Unmarshal(tf.buf[:int(pkgLen)], mes)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("反序列化失败：%v", err)
+// 	}
+// 	return mes, nil
+// }
+
 func (tf *Transfer) ReadPkg() (*message.Message, error) {
 	n, err := tf.Conn.Read(tf.buf[:4])
 	if err != nil {

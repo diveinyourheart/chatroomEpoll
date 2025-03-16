@@ -363,6 +363,11 @@ func (up *UserProcess) Register(userId int, userPwd string, userName string) (er
 	}
 	tlsConn := tls.Client(conn, tlsConfig)
 	defer tlsConn.Close()
+
+	if err != nil {
+		return fmt.Errorf("与服务端TLS握手失败：%v", err)
+	}
+
 	tf := &utils.Transfer{
 		Conn: tlsConn,
 	}
@@ -417,6 +422,10 @@ func (up *UserProcess) Login(userId int, userPwd string) (tlsConn *tls.Conn, er 
 	}
 
 	tlsConn = tls.Client(conn, tlsConfig)
+	err = tlsConn.Handshake()
+	if err != nil {
+		return nil, fmt.Errorf("与服务端TLS握手失败：%v", err)
+	}
 	tf := &utils.Transfer{
 		Conn: tlsConn,
 	}
